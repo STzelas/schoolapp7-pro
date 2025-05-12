@@ -8,7 +8,7 @@ import jakarta.persistence.criteria.*;
 
 import java.util.*;
 
-public class AbstractDAO<T extends IdentifiableEntity> implements IGenericDAO<T> {
+public abstract class AbstractDAO<T extends IdentifiableEntity> implements IGenericDAO<T> {
     private Class<T> peristenceClass;
 
     public AbstractDAO() {
@@ -74,7 +74,13 @@ public class AbstractDAO<T extends IdentifiableEntity> implements IGenericDAO<T>
 
     @Override
     public Optional<T> findByField(String fieldName, Object value) {
-        return Optional.empty();
+        String queryString = "SELECT e FROM " + peristenceClass.getSimpleName() + " e WHERE e." + fieldName + " = value";
+
+        TypedQuery<T> query = getEntityManager().createQuery(queryString, peristenceClass);
+
+        query.setParameter("value", value);
+
+        return query.getResultList().stream().findFirst();
     }
 
     @Override
@@ -84,7 +90,7 @@ public class AbstractDAO<T extends IdentifiableEntity> implements IGenericDAO<T>
 
     @Override
     public List<T> getByCriteria(Map<String, Object> criteria) {
-        return List.of();
+        return getByCriteria(getPeristenceClass(), criteria);
     }
 
     @Override
