@@ -3,6 +3,7 @@ package gr.aueb.cf.schoolapp.rest;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityGenericException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityInvalidArgumentException;
+import gr.aueb.cf.schoolapp.core.exceptions.EntityNotFoundException;
 import gr.aueb.cf.schoolapp.dto.TeacherInsertDTO;
 import gr.aueb.cf.schoolapp.dto.TeacherReadOnlyDTO;
 import gr.aueb.cf.schoolapp.dto.TeacherUpdateDTO;
@@ -10,10 +11,7 @@ import gr.aueb.cf.schoolapp.service.ITeacherService;
 import gr.aueb.cf.schoolapp.validator.ValidatorUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -93,7 +91,26 @@ public class TeacherRestController {
      * ΣΤΟ REST Δεν χρησιμοποιούμε query params για resources !!!
      * Query params, μόνο για page / size / sort κλπ, όχι για πόρους
      * Εδώ έχουμε path params!
+     *
+     * Υπογραφή του update controller (bind το pathparam σε μία δική μας Long teacherId, και το updateDTO)
      */
+    @PUT
     @Path("/{teacherId}")
-    public Response updateTeacher(TeacherUpdateDTO updateDTO)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateTeacher(@PathParam("teacherId")Long teacherId, TeacherUpdateDTO updateDTO)
+            throws EntityInvalidArgumentException, EntityNotFoundException {
+        List<String> errors = ValidatorUtil.validateDTO(updateDTO);
+        if (!errors.isEmpty()) {
+            throw new EntityInvalidArgumentException("Teacher", String.join("\n", errors));
+        }
+
+        TeacherReadOnlyDTO readOnlyDTO = teacherService.updateTeacher(updateDTO);
+
+        return Response
+                .status(Response.Status.OK)
+                .entity(readOnlyDTO)
+                .build();
+
+    }
 }
