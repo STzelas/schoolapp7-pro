@@ -7,7 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class TeacherDAOImpl extends AbstractDAO<Teacher> implements ITeacherDAO {
 
     public TeacherDAOImpl() {
-        this.setPeristenceClass(Teacher.class);
+        this.setPersistenceClass(Teacher.class);
     }
 
 }
