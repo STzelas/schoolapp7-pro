@@ -4,10 +4,7 @@ import gr.aueb.cf.schoolapp.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityGenericException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityInvalidArgumentException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityNotFoundException;
-import gr.aueb.cf.schoolapp.dto.TeacherFiltersDTO;
-import gr.aueb.cf.schoolapp.dto.TeacherInsertDTO;
-import gr.aueb.cf.schoolapp.dto.TeacherReadOnlyDTO;
-import gr.aueb.cf.schoolapp.dto.TeacherUpdateDTO;
+import gr.aueb.cf.schoolapp.dto.*;
 import gr.aueb.cf.schoolapp.mapper.Mapper;
 import gr.aueb.cf.schoolapp.service.ITeacherService;
 import gr.aueb.cf.schoolapp.validator.ValidatorUtil;
@@ -169,5 +166,38 @@ public class TeacherRestController {
                 .entity(readOnlyDTOS)
                 .build();
 
+    }
+
+    /**
+     * ΠΕΡΙΠΤΩΣΗ 2.
+     * PAGINATION ΔΗΛΑΔΗ ΣΕΛΙΔΕΣ ΚΛΠ
+     */
+    public PaginatedResult<TeacherReadOnlyDTO> getFilteredPaginated(@QueryParam("firstname") @DefaultValue("") String firstname,
+                                                                    @QueryParam("lastname") @DefaultValue("") String lastname,
+                                                                    @QueryParam("vat") @DefaultValue("") String vat,
+                                                                    @QueryParam("page")@DefaultValue("") Integer page,
+                                                                    @QueryParam("size")@DefaultValue("")Integer size)
+                throws EntityInvalidArgumentException{
+
+
+        TeacherFiltersDTO filtersDTO = new TeacherFiltersDTO(firstname, lastname, vat);
+
+        Map<String, Object> criteria;
+
+        criteria = Mapper.mapToCriteria(filtersDTO);
+
+        if (page < 0) throw new EntityInvalidArgumentException("PageInvalidNumber", "Invalid page number");
+        if (size <= 0) throw new EntityInvalidArgumentException("SizeInvalidNumber", "Invaldi size number");
+
+        List<TeacherReadOnlyDTO> readOnlyDTOS = teacherService.getTeachersByCriteriaPaginated(criteria, page, size);
+        long totalItems = teacherService.getTeachersCountByCriteria(criteria); // επιστρέφει count
+        int totalPages = (int) Math.ceil((double)totalItems / size);
+        return new PaginatedResult<>(   // record
+            readOnlyDTOS,
+            page,
+            size,
+            totalPages,
+            totalItems
+        );
     }
 }
