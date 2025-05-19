@@ -172,11 +172,14 @@ public class TeacherRestController {
      * ΠΕΡΙΠΤΩΣΗ 2.
      * PAGINATION ΔΗΛΑΔΗ ΣΕΛΙΔΕΣ ΚΛΠ
      */
+    @GET
+    @Path("/paginated")
+    @Produces(MediaType.APPLICATION_JSON)
     public PaginatedResult<TeacherReadOnlyDTO> getFilteredPaginated(@QueryParam("firstname") @DefaultValue("") String firstname,
                                                                     @QueryParam("lastname") @DefaultValue("") String lastname,
                                                                     @QueryParam("vat") @DefaultValue("") String vat,
-                                                                    @QueryParam("page")@DefaultValue("") Integer page,
-                                                                    @QueryParam("size")@DefaultValue("")Integer size)
+                                                                    @QueryParam("page")@DefaultValue("0") Integer page,
+                                                                    @QueryParam("size")@DefaultValue("10") Integer size)
                 throws EntityInvalidArgumentException{
 
 
