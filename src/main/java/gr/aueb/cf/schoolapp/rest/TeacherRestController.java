@@ -5,6 +5,7 @@ import gr.aueb.cf.schoolapp.core.exceptions.EntityGenericException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityInvalidArgumentException;
 import gr.aueb.cf.schoolapp.dto.TeacherInsertDTO;
 import gr.aueb.cf.schoolapp.dto.TeacherReadOnlyDTO;
+import gr.aueb.cf.schoolapp.dto.TeacherUpdateDTO;
 import gr.aueb.cf.schoolapp.service.ITeacherService;
 import gr.aueb.cf.schoolapp.validator.ValidatorUtil;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -52,8 +53,12 @@ public class TeacherRestController {
      */
     @POST
     @Path("")
-    @Consumes(MediaType.APPLICATION_JSON) // Όταν υπάρχει data request
-    @Produces(MediaType.APPLICATION_JSON) // response
+    /**
+     * Όταν κουβαλάει data το request θέλουμε @Consumes(MediaType. ότι media είναι πχ json, xml κλπ)
+     * Όταν κουβαλάει data το response θέλουμε @Produces(MediaType. ότι media είναι πχ json, xml κλπ)
+     */
+    @Consumes(MediaType.APPLICATION_JSON) // Όταν υπάρχει data request, στο GET πχ δε χρειάζεται
+    @Produces(MediaType.APPLICATION_JSON) // στέλνει payload json, response / Στο GET χρειάζεται σίγουρα
     public Response addTeacher(TeacherInsertDTO insertDTO, @Context UriInfo uriInfo)
             throws EntityInvalidArgumentException, EntityAlreadyExistsException {
         List<String> errors = ValidatorUtil.validateDTO(insertDTO);
@@ -82,4 +87,13 @@ public class TeacherRestController {
                 .entity(readOnlyDTO)
                 .build();
     }
+
+    /**
+     * Τελικό URI -> /teachers/{το id του teacher πχ 1},
+     * ΣΤΟ REST Δεν χρησιμοποιούμε query params για resources !!!
+     * Query params, μόνο για page / size / sort κλπ, όχι για πόρους
+     * Εδώ έχουμε path params!
+     */
+    @Path("/{teacherId}")
+    public Response updateTeacher(TeacherUpdateDTO updateDTO)
 }
