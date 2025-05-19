@@ -8,10 +8,7 @@ import jakarta.persistence.criteria.*;
 
 import java.util.*;
 
-/**
- *
- * @param <T>
- */
+
 public abstract class AbstractDAO<T extends IdentifiableEntity> implements IGenericDAO<T> {
 
 //    private final Class<T> persistenceClass;
