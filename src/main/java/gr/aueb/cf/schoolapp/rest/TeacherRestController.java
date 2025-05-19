@@ -4,9 +4,11 @@ import gr.aueb.cf.schoolapp.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityGenericException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityInvalidArgumentException;
 import gr.aueb.cf.schoolapp.core.exceptions.EntityNotFoundException;
+import gr.aueb.cf.schoolapp.dto.TeacherFiltersDTO;
 import gr.aueb.cf.schoolapp.dto.TeacherInsertDTO;
 import gr.aueb.cf.schoolapp.dto.TeacherReadOnlyDTO;
 import gr.aueb.cf.schoolapp.dto.TeacherUpdateDTO;
+import gr.aueb.cf.schoolapp.mapper.Mapper;
 import gr.aueb.cf.schoolapp.service.ITeacherService;
 import gr.aueb.cf.schoolapp.validator.ValidatorUtil;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller με RestAPI
@@ -109,7 +112,61 @@ public class TeacherRestController {
 
         return Response
                 .status(Response.Status.OK)
+                .entity(readOnlyDTO)   // Αυτόματα serialization επειδή έχουμε το jackson
+                .build();
+
+    }
+
+    @DELETE
+    @Path("/{teacherId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteTeacher(@PathParam("teacherId") Long teacherId)
+            throws EntityNotFoundException {
+
+        TeacherReadOnlyDTO readOnlyDTO = teacherService.getTeacherById(teacherId); // Βλέπουμε αν υπάρχει
+
+        teacherService.deleteTeacher(teacherId);  // Αν υπάρχει κατευθείαν delete
+
+        return Response
+                .status(Response.Status.OK)
                 .entity(readOnlyDTO)
+                .build();
+    }
+
+    @GET
+    @Path("/{teacherId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTeacher(@PathParam("teacherId")Long id)
+            throws EntityNotFoundException {
+
+        TeacherReadOnlyDTO readOnlyDTO = teacherService.getTeacherById(id);
+
+        return Response
+                .status(Response.Status.OK)
+                .entity(readOnlyDTO)
+                .build();
+    }
+
+    /**
+     * ΠΕΡΙΠΤΩΣΗ 1.
+     * ΧΩΡΙΣ PAGINATION ΔΗΛΑΔΗ ΣΕΛΙΔΕΣ ΚΛΠ
+     */
+    @GET
+    @Path("/filtered")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFiltered(@QueryParam("firstname") @DefaultValue("") String firstname,
+                                @QueryParam("lastname") @DefaultValue("") String lastname,
+                                @QueryParam("vat") @DefaultValue("") String vat) {
+        TeacherFiltersDTO filtersDTO = new TeacherFiltersDTO(firstname, lastname, vat);
+
+        Map<String, Object> criteria;
+
+        criteria = Mapper.mapToCriteria(filtersDTO);
+        List<TeacherReadOnlyDTO> readOnlyDTOS = teacherService.getTeachersByCriteria(criteria);
+
+        return Response
+                .status(Response.Status.OK)
+                .entity(readOnlyDTOS)
                 .build();
 
     }
