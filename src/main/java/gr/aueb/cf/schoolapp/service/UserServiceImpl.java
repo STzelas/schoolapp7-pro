@@ -43,7 +43,7 @@ public class UserServiceImpl implements IUserService{
             return readOnlyDTO;
         } catch (AppServerException e) {
             JPAHelper.rollbackTransaction();
-            LOGGER.error("User with username = {} not insered", dto.getUsername(), e);
+            LOGGER.error("User with username = {} not inserted", dto.getUsername(), e);
             throw e;
         } finally {
             JPAHelper.closeEntityManager();
@@ -52,16 +52,48 @@ public class UserServiceImpl implements IUserService{
 
     @Override
     public UserReadOnlyDTO getUserByUsername(String username) throws EntityNotFoundException {
-        return null;
+        try {
+            JPAHelper.beginTransaction();
+
+
+            UserReadOnlyDTO readOnlyDTO = userDAO.getByUsername(username)
+                    .map(Mapper::mapToUserReadOnlyDTO)
+                    .orElseThrow(() -> new EntityNotFoundException("User", "User with username: " + username + " not found"));
+
+
+            JPAHelper.commitTransaction();
+            return readOnlyDTO;
+        } catch (EntityNotFoundException e) {
+            LOGGER.warn("User with username = {} not found", username, e);
+            throw e;
+        } finally {
+            JPAHelper.closeEntityManager();
+        }
     }
 
     @Override
     public boolean isUserValid(String username, String password) {
-        return false;
+        try {
+            JPAHelper.beginTransaction();
+
+            boolean isValid = userDAO.isUserValid(username, password);
+            JPAHelper.commitTransaction();
+            return isValid;
+        } finally {
+            JPAHelper.closeEntityManager();
+        }
     }
 
     @Override
     public boolean isEmailExists(String username) {
-        return false;
+        try {
+            JPAHelper.beginTransaction();
+
+            boolean isEmailExists = userDAO.isEmailExists(username);
+            JPAHelper.commitTransaction();
+            return isEmailExists;
+        } finally {
+            JPAHelper.closeEntityManager();
+        }
     }
 }
