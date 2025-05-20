@@ -25,7 +25,7 @@ import java.security.Principal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements Principal, Serializable {
+public class User implements Principal, IdentifiableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // auto increment
