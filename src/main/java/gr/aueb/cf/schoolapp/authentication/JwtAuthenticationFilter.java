@@ -62,8 +62,8 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
                 if (user != null && jwtService.isTokenValid(token, user)) {
                     requestContext.setSecurityContext(new CustomSecurityContext(user));
                 } else {
-                    System.out.println("Token is not valid" + requestContext.getUriInfo());
-                    //
+                    // System.out.println("Token is not valid" + requestContext.getUriInfo());
+                    throw new NotAuthorizedException("User", "User not valid");
                 }
             }
 //            String username = jwtService.extractSubject(token);
@@ -87,7 +87,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
 //                requestContext.setSecurityContext(new CustomSecurityContext(user));
 //            }
         } catch (Exception e) {
-            LOGGER.warn("JWT validation failed", e);
+            LOGGER.error("JWT validation failed", e);
         }
     }
 
